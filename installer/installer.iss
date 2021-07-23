@@ -2,7 +2,12 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "QuestPatcher"
-#define MyAppVersion "1.2.0"
+
+#define VersionFile FileOpen("..\VERSION")
+#define MyAppVersion FileRead(VersionFile)
+#expr FileClose(VersionFile)
+#undef VersionFile
+
 #define MyAppPublisher "Lauriethefish#6700"
 #define MyAppURL "https://github.com/Lauriethefish/QuestPatcher"
 #define MyAppExeName "QuestPatcher.exe"
@@ -27,7 +32,7 @@ InfoAfterFile=.\information.txt
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=.\
-OutputBaseFilename=windows-installer
+OutputBaseFilename=QuestPatcher-windows
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -37,8 +42,8 @@ ArchitecturesInstallIn64BitMode=x64
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
-Source: "..\bin\Release\net5.0\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\bin\Release\net5.0\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\QuestPatcher\bin\Release\net5.0\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\QuestPatcher\bin\Release\net5.0\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

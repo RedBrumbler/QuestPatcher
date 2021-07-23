@@ -1,10 +1,9 @@
 name: Windows Installer
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  release:
+    types:
+      - created
 
 jobs:
   build:
@@ -17,12 +16,26 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.102
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Run build script
-      run: ./buildInstaller.ps1
-    - name: Artifact Upload
-      uses: actions/upload-artifact@v2
+    - name: Download Inno Setup
+      uses: suisei-cn/actions-download-file@v1
       with:
-        name: windows-installer
-        path: ./installer/windows-installer.exe
+        url: https://jrsoftware.org/download.php/is.exe
+        target: ../
+    - name: Install Inno Setup
+      run: '../is.exe /VERYSILENT /NORESTART /ALLUSERS'
+    - name: Set version
+      run: '"${{ github.event.release.tag_name }}" | Out-File -NoNewline -FilePath ./VERSION'
+    - name: Build QuestPatcher
+      run: dotnet publish QuestPatcher/QuestPatcher.csproj -c Release -r win-x64
+    - name: Compile Installer
+      run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /f installer/installer.iss'
+    - name: Upload Release Asset
+      id: upload-release-asset 
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./installer/QuestPatcher-windows.exe
+        asset_name: QuestPatcher-windows.exe
+        asset_content_type: application/octet-stream
